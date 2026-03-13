@@ -1,51 +1,57 @@
 package com.local.cooperative.model;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.local.cooperative.enums.AccountType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_account_number", columnNames = "account_number")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @NotBlank
+    @Size(max = 30)
+    @Column(name = "account_number", nullable = false, length = 30)
     private String accountNumber;
 
-    @Column(nullable = false)
-    private Double balance = 0.0;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false, length = 20)
+    private AccountType accountType;
 
-    @Column(nullable = false)
-    private String accountType;
+    @NotNull
+    @Column(name = "balance", nullable = false, precision = 15, scale = 2)
+    @Builder.Default
+    private BigDecimal balance = BigDecimal.ZERO;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    // Many-to-One: many accounts belong to one member
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    // One-to-Many: one account has many transactions
     @JsonIgnore
-    private User user;
-
-    public Account() {}
-
-    public Account(String accountNumber, Double balance, String accountType, User user) {
-        this.accountNumber = accountNumber;
-        this.balance = balance;
-        this.accountType = accountType;
-        this.user = user;
-    }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-
-    public Double getBalance() { return balance; }
-    public void setBalance(Double balance) { this.balance = balance; }
-
-    public String getAccountType() { return accountType; }
-    public void setAccountType(String accountType) { this.accountType = accountType; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    @Builder.Default
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions = new ArrayList<>();
 }

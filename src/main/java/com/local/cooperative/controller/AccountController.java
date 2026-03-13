@@ -1,56 +1,61 @@
 package com.local.cooperative.controller;
 
+import com.local.cooperative.dto.AccountRequest;
 import com.local.cooperative.model.Account;
 import com.local.cooperative.service.AccountService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/accounts")
+@RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
 
-    public AccountController(AccountService accountService) {
-        this.accountService = accountService;
-    }
-
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Map<String, Object> request) {
-        Account account = new Account();
-        account.setAccountNumber((String) request.get("accountNumber"));
-        account.setBalance(Double.valueOf(request.get("balance").toString()));
-        account.setAccountType((String) request.get("accountType"));
-        Long userId = Long.valueOf(request.get("userId").toString());
-
-        Account saved = accountService.createAccount(account, userId);
-        return ResponseEntity.ok(saved);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable Long id) {
-        return ResponseEntity.ok(accountService.getAccountById(id));
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<Account> getAccountByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(accountService.getAccountByUserId(userId));
+    public ResponseEntity<Account> create(@RequestBody AccountRequest request) {
+        return new ResponseEntity<>(accountService.create(request), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAllAccounts() {
-        return ResponseEntity.ok(accountService.getAllAccounts());
+    public ResponseEntity<Page<Account>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "accountNumber") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        return ResponseEntity.ok(accountService.getAll(page, size, sortBy, direction));
     }
 
-    @GetMapping("/exists")
-    public ResponseEntity<Map<String, Boolean>> existsByAccountNumber(@RequestParam String accountNumber) {
-        boolean exists = accountService.existsByAccountNumber(accountNumber);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("exists", exists);
-        return ResponseEntity.ok(response);
+    @GetMapping("/{id}")
+    public ResponseEntity<Account> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(accountService.getById(id));
+    }
+
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<List<Account>> getByMemberId(@PathVariable UUID memberId) {
+        return ResponseEntity.ok(accountService.getByMemberId(memberId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Account> update(@PathVariable UUID id, @RequestBody AccountRequest request) {
+        return ResponseEntity.ok(accountService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        accountService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/exists/account-number/{accountNumber}")
+    public ResponseEntity<Boolean> existsByAccountNumber(@PathVariable String accountNumber) {
+        return ResponseEntity.ok(accountService.existsByAccountNumber(accountNumber));
     }
 }

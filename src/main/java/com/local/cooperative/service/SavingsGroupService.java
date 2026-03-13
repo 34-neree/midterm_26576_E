@@ -1,59 +1,93 @@
 package com.local.cooperative.service;
 
+import com.local.cooperative.dto.SavingsGroupRequest;
+import com.local.cooperative.exception.BadRequestException;
+import com.local.cooperative.exception.ResourceNotFoundException;
+import com.local.cooperative.model.Member;
 import com.local.cooperative.model.SavingsGroup;
-import com.local.cooperative.model.User;
+import com.local.cooperative.repository.MemberRepository;
 import com.local.cooperative.repository.SavingsGroupRepository;
-import com.local.cooperative.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class SavingsGroupService {
 
     private final SavingsGroupRepository savingsGroupRepository;
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
-    public SavingsGroupService(SavingsGroupRepository savingsGroupRepository,
-                                UserRepository userRepository) {
-        this.savingsGroupRepository = savingsGroupRepository;
-        this.userRepository = userRepository;
-    }
+    public SavingsGroup create(SavingsGroupRequest request) {
+        if (savingsGroupRepository.existsByName(request.getName())) {
+            throw new BadRequestException("Savings group name already exists");
+        }
 
-    public SavingsGroup createSavingsGroup(SavingsGroup group) {
+        SavingsGroup group = SavingsGroup.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
+
         return savingsGroupRepository.save(group);
     }
 
-    public SavingsGroup getSavingsGroupById(Long id) {
+    public Page<SavingsGroup> getAll(int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return savingsGroupRepository.findAll(pageable);
+    }
+
+    public SavingsGroup getById(UUID id) {
         return savingsGroupRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Savings Group not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Savings group not found"));
     }
 
-    public List<SavingsGroup> getAllSavingsGroups() {
-        return savingsGroupRepository.findAll();
+    public SavingsGroup update(UUID id, SavingsGroupRequest request) {
+        SavingsGroup group = getById(id);
+        group.setName(request.getName());
+        group.setDescription(request.getDescription());
+        return savingsGroupRepository.save(group);
     }
 
-    public SavingsGroup addMemberToGroup(Long groupId, Long userId) {
-        SavingsGroup group = savingsGroupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Savings Group not found with id: " + groupId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-
-        user.getSavingsGroups().add(group);
-        userRepository.save(user);
-
-        return savingsGroupRepository.findById(groupId).get();
+    public void delete(UUID id) {
+        SavingsGroup group = getById(id);
+        savingsGroupRepository.delete(group);
     }
 
-    public SavingsGroup removeMemberFromGroup(Long groupId, Long userId) {
-        SavingsGroup group = savingsGroupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Savings Group not found with id: " + groupId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public boolean existsByName(String name) {
+        return savingsGroupRepository.existsByName(name);
+    }
 
-        user.getSavingsGroups().remove(group);
-        userRepository.save(user);
+    // Add a member to a savings group (Many-to-Many)
+    public SavingsGroup addMember(UUID groupId, UUID memberId) {
+        SavingsGroup group = getById(groupId);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-        return savingsGroupRepository.findById(groupId).get();
+        if (member.getSavingsGroups().contains(group)) {
+            throw new BadRequestException("Member is already in this savings group");
+        }
+
+        member.getSavingsGroups().add(group);
+        memberRepository.save(member);
+
+        return savingsGroupRepository.findById(groupId).orElseThrow();
+    }
+
+    // Remove a member from a savings group
+    public SavingsGroup removeMember(UUID groupId, UUID memberId) {
+        SavingsGroup group = getById(groupId);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        member.getSavingsGroups().remove(group);
+        memberRepository.save(member);
+
+        return savingsGroupRepository.findById(groupId).orElseThrow();
     }
 }
