@@ -18,13 +18,10 @@ public class SavingsGroup {
 
     private String description;
 
-    // Many SavingsGroups have Many Users (Many-to-Many)
-    // This is the inverse side (mappedBy the "savingsGroups" field in User)
     @ManyToMany(mappedBy = "savingsGroups", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<User> members = new HashSet<>();
 
-    // Constructors
     public SavingsGroup() {}
 
     public SavingsGroup(String name, String description) {
@@ -32,7 +29,6 @@ public class SavingsGroup {
         this.description = description;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

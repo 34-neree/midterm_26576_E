@@ -19,18 +19,15 @@ public class District {
     @Column(nullable = false)
     private String name;
 
-    // Many Districts belong to one Province (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "province_id", nullable = false)
     @JsonBackReference
     private Province province;
 
-    // One District has many Sectors (One-to-Many)
     @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Sector> sectors;
 
-    // Constructors
     public District() {}
 
     public District(String code, String name, Province province) {
@@ -39,7 +36,6 @@ public class District {
         this.province = province;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

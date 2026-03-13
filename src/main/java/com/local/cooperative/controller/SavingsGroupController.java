@@ -17,7 +17,6 @@ public class SavingsGroupController {
         this.savingsGroupService = savingsGroupService;
     }
 
-    // ========== Create Savings Group ==========
     @PostMapping
     public ResponseEntity<SavingsGroup> createSavingsGroup(@RequestBody SavingsGroup group) {
         SavingsGroup saved = savingsGroupService.createSavingsGroup(group);
@@ -34,23 +33,12 @@ public class SavingsGroupController {
         return ResponseEntity.ok(savingsGroupService.getAllSavingsGroups());
     }
 
-    // ========== Many-to-Many: Add User to Savings Group ==========
-    // The Many-to-Many relationship between User and SavingsGroup uses
-    // a join table called "user_savings_group" with two columns:
-    //   - user_id (FK to users table)
-    //   - savings_group_id (FK to savings_groups table)
-    //
-    // When a user is added to a group, JPA inserts a new row into
-    // the join table: INSERT INTO user_savings_group (user_id, savings_group_id) VALUES (?, ?)
     @PostMapping("/{groupId}/members/{userId}")
     public ResponseEntity<SavingsGroup> addMember(@PathVariable Long groupId, @PathVariable Long userId) {
         SavingsGroup updated = savingsGroupService.addMemberToGroup(groupId, userId);
         return ResponseEntity.ok(updated);
     }
 
-    // ========== Many-to-Many: Remove User from Savings Group ==========
-    // Removes the row from the join table:
-    // DELETE FROM user_savings_group WHERE user_id = ? AND savings_group_id = ?
     @DeleteMapping("/{groupId}/members/{userId}")
     public ResponseEntity<SavingsGroup> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
         SavingsGroup updated = savingsGroupService.removeMemberFromGroup(groupId, userId);

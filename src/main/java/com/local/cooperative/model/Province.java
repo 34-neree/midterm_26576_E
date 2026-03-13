@@ -18,12 +18,10 @@ public class Province {
     @Column(nullable = false)
     private String name;
 
-    // One Province has many Districts (One-to-Many)
     @OneToMany(mappedBy = "province", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<District> districts;
 
-    // Constructors
     public Province() {}
 
     public Province(String code, String name) {
@@ -31,7 +29,6 @@ public class Province {
         this.name = name;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

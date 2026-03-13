@@ -18,16 +18,13 @@ public class Account {
     private Double balance = 0.0;
 
     @Column(nullable = false)
-    private String accountType; // e.g., "SAVINGS", "LOAN"
+    private String accountType;
 
-    // One Account belongs to One User (One-to-One)
-    // This is the owning side with the foreign key
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     @JsonIgnore
     private User user;
 
-    // Constructors
     public Account() {}
 
     public Account(String accountNumber, Double balance, String accountType, User user) {
@@ -37,7 +34,6 @@ public class Account {
         this.user = user;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

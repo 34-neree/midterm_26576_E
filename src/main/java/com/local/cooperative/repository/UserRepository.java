@@ -11,14 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // ========== existsBy() method ==========
-    // Checks if a user exists by their email address
-    // Spring Data JPA translates this into: SELECT COUNT(*) > 0 FROM users WHERE email = ?
     boolean existsByEmail(String email);
 
-    // ========== Retrieve all users from a given province using province code OR province name ==========
-    // Uses JPQL query to traverse the hierarchy: User → Village → Cell → Sector → District → Province
-    // The :code and :name parameters allow searching by either province code OR province name
     @Query("SELECT u FROM User u " +
            "JOIN u.village v " +
            "JOIN v.cell c " +
@@ -30,9 +24,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("code") String code,
             @Param("name") String name,
             Pageable pageable);
-
-    // ========== Pagination and Sorting ==========
-    // JpaRepository already extends PagingAndSortingRepository
-    // So findAll(Pageable pageable) is available by default
-    // Pageable contains page number, page size, and Sort direction
 }

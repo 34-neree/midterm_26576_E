@@ -6,6 +6,8 @@ import com.local.cooperative.repository.AccountRepository;
 import com.local.cooperative.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AccountService {
 
@@ -17,14 +19,10 @@ public class AccountService {
         this.userRepository = userRepository;
     }
 
-    // ========== Create Account (One-to-One with User) ==========
-    // Each user has exactly one account. The account table has a user_id foreign key
-    // with a UNIQUE constraint, ensuring the One-to-One relationship.
     public Account createAccount(Account account, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // Check if user already has an account
         if (accountRepository.findByUserId(userId).isPresent()) {
             throw new RuntimeException("User already has an account");
         }
@@ -43,11 +41,10 @@ public class AccountService {
                 .orElseThrow(() -> new RuntimeException("Account not found for user id: " + userId));
     }
 
-    public java.util.List<Account> getAllAccounts() {
+    public List<Account> getAllAccounts() {
         return accountRepository.findAll();
     }
 
-    // Demonstrates existsBy() method
     public boolean existsByAccountNumber(String accountNumber) {
         return accountRepository.existsByAccountNumber(accountNumber);
     }

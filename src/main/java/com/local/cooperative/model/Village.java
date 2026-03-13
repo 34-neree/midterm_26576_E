@@ -19,18 +19,15 @@ public class Village {
     @Column(nullable = false)
     private String name;
 
-    // Many Villages belong to one Cell (Many-to-One)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cell_id", nullable = false)
     @JsonBackReference
     private Cell cell;
 
-    // One Village has many Users (One-to-Many)
     @OneToMany(mappedBy = "village", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<User> users;
 
-    // Constructors
     public Village() {}
 
     public Village(String code, String name, Cell cell) {
@@ -39,7 +36,6 @@ public class Village {
         this.cell = cell;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

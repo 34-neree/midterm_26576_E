@@ -4,6 +4,8 @@ import com.local.cooperative.model.*;
 import com.local.cooperative.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class LocationService {
 
@@ -25,12 +27,11 @@ public class LocationService {
         this.villageRepository = villageRepository;
     }
 
-    // ========== Province ==========
     public Province saveProvince(Province province) {
         return provinceRepository.save(province);
     }
 
-    public java.util.List<Province> getAllProvinces() {
+    public List<Province> getAllProvinces() {
         return provinceRepository.findAll();
     }
 
@@ -39,8 +40,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("Province not found with id: " + id));
     }
 
-    // ========== District ==========
-    // When saving a district, we link it to an existing province using provinceId
     public District saveDistrict(District district, Long provinceId) {
         Province province = provinceRepository.findById(provinceId)
                 .orElseThrow(() -> new RuntimeException("Province not found with id: " + provinceId));
@@ -48,7 +47,7 @@ public class LocationService {
         return districtRepository.save(district);
     }
 
-    public java.util.List<District> getAllDistricts() {
+    public List<District> getAllDistricts() {
         return districtRepository.findAll();
     }
 
@@ -57,8 +56,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("District not found with id: " + id));
     }
 
-    // ========== Sector ==========
-    // When saving a sector, we link it to an existing district using districtId
     public Sector saveSector(Sector sector, Long districtId) {
         District district = districtRepository.findById(districtId)
                 .orElseThrow(() -> new RuntimeException("District not found with id: " + districtId));
@@ -66,7 +63,7 @@ public class LocationService {
         return sectorRepository.save(sector);
     }
 
-    public java.util.List<Sector> getAllSectors() {
+    public List<Sector> getAllSectors() {
         return sectorRepository.findAll();
     }
 
@@ -75,8 +72,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("Sector not found with id: " + id));
     }
 
-    // ========== Cell ==========
-    // When saving a cell, we link it to an existing sector using sectorId
     public Cell saveCell(Cell cell, Long sectorId) {
         Sector sector = sectorRepository.findById(sectorId)
                 .orElseThrow(() -> new RuntimeException("Sector not found with id: " + sectorId));
@@ -84,7 +79,7 @@ public class LocationService {
         return cellRepository.save(cell);
     }
 
-    public java.util.List<Cell> getAllCells() {
+    public List<Cell> getAllCells() {
         return cellRepository.findAll();
     }
 
@@ -93,9 +88,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("Cell not found with id: " + id));
     }
 
-    // ========== Village ==========
-    // When saving a village, we link it to an existing cell using cellId
-    // This completes the hierarchy: Province → District → Sector → Cell → Village
     public Village saveVillage(Village village, Long cellId) {
         Cell cell = cellRepository.findById(cellId)
                 .orElseThrow(() -> new RuntimeException("Cell not found with id: " + cellId));
@@ -103,7 +95,7 @@ public class LocationService {
         return villageRepository.save(village);
     }
 
-    public java.util.List<Village> getAllVillages() {
+    public List<Village> getAllVillages() {
         return villageRepository.findAll();
     }
 
@@ -112,7 +104,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("Village not found with id: " + id));
     }
 
-    // Check if village exists by its code - demonstrates existsBy()
     public boolean villageExistsByCode(String code) {
         return villageRepository.existsByCode(code);
     }

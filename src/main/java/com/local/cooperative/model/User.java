@@ -24,20 +24,14 @@ public class User {
 
     private String phone;
 
-    // Many Users belong to one Village (Many-to-One)
-    // When saving a User, only village_id is needed.
-    // The system resolves: Village → Cell → Sector → District → Province
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "village_id", nullable = false)
     @JsonBackReference
     private Village village;
 
-    // One User has One Account (One-to-One) - mapped by Account entity
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Account account;
 
-    // Many Users belong to Many SavingsGroups (Many-to-Many)
-    // This creates a join table "user_savings_group"
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_savings_group",
@@ -46,7 +40,6 @@ public class User {
     )
     private Set<SavingsGroup> savingsGroups = new HashSet<>();
 
-    // Constructors
     public User() {}
 
     public User(String firstName, String lastName, String email, String phone, Village village) {
@@ -57,7 +50,6 @@ public class User {
         this.village = village;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

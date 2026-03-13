@@ -19,9 +19,6 @@ public class LocationController {
         this.locationService = locationService;
     }
 
-    // ==================== PROVINCE ====================
-
-    // Save a Province - the top level of the location hierarchy
     @PostMapping("/provinces")
     public ResponseEntity<Province> saveProvince(@RequestBody Province province) {
         Province saved = locationService.saveProvince(province);
@@ -38,11 +35,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getProvinceById(id));
     }
 
-    // ==================== DISTRICT ====================
-
-    // Save a District - linked to a Province via provinceId
-    // The relationship is handled by setting the Province object on the District entity
-    // JPA stores the province_id foreign key in the districts table
     @PostMapping("/districts")
     public ResponseEntity<District> saveDistrict(@RequestBody Map<String, Object> request) {
         District district = new District();
@@ -63,9 +55,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getDistrictById(id));
     }
 
-    // ==================== SECTOR ====================
-
-    // Save a Sector - linked to a District via districtId
     @PostMapping("/sectors")
     public ResponseEntity<Sector> saveSector(@RequestBody Map<String, Object> request) {
         Sector sector = new Sector();
@@ -86,9 +75,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getSectorById(id));
     }
 
-    // ==================== CELL ====================
-
-    // Save a Cell - linked to a Sector via sectorId
     @PostMapping("/cells")
     public ResponseEntity<Cell> saveCell(@RequestBody Map<String, Object> request) {
         Cell cell = new Cell();
@@ -109,10 +95,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getCellById(id));
     }
 
-    // ==================== VILLAGE ====================
-
-    // Save a Village - linked to a Cell via cellId
-    // This completes saving the hierarchy: Province → District → Sector → Cell → Village
     @PostMapping("/villages")
     public ResponseEntity<Village> saveVillage(@RequestBody Map<String, Object> request) {
         Village village = new Village();
@@ -133,7 +115,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getVillageById(id));
     }
 
-    // Check if a village exists by code - demonstrates existsBy()
     @GetMapping("/villages/exists")
     public ResponseEntity<Map<String, Boolean>> villageExistsByCode(@RequestParam String code) {
         boolean exists = locationService.villageExistsByCode(code);

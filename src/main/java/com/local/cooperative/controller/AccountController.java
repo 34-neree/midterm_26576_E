@@ -19,11 +19,6 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    // ========== Create Account (One-to-One Relationship) ==========
-    // Each User has exactly one Account. The Account entity has a @OneToOne
-    // relationship with User, using user_id as the foreign key.
-    // The @JoinColumn(name = "user_id", unique = true) ensures that
-    // no two accounts can reference the same user.
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Map<String, Object> request) {
         Account account = new Account();
@@ -51,7 +46,6 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAllAccounts());
     }
 
-    // Demonstrates existsBy() method
     @GetMapping("/exists")
     public ResponseEntity<Map<String, Boolean>> existsByAccountNumber(@RequestParam String accountNumber) {
         boolean exists = accountService.existsByAccountNumber(accountNumber);
